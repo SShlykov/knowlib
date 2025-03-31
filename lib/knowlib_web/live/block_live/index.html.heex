@@ -1,0 +1,52 @@
+<div class="mt-4 bg-white w-full px-8 py-4">
+  <.header>
+    Список блоков знаний
+    <:actions>
+      <.link patch={~p"/blocks/new"}>
+        <.button>Создать</.button>
+      </.link>
+    </:actions>
+  </.header>
+
+  <.table
+    id="blocks"
+    rows={@streams.blocks}
+    row_click={fn {_id, block} -> JS.navigate(~p"/blocks/#{block}") end}
+  >
+    <:col :let={{_id, block}} label="ID">{block.id}</:col>
+    <:col :let={{_id, block}} label="Имя">{block.name}</:col>
+    <:col :let={{_id, block}} label="Описание">{block.description}</:col>
+    <:col :let={{_id, block}} label="Иконка">{block.icon}</:col>
+    <:action :let={{_id, block}}>
+      <div class="sr-only">
+        <.link navigate={~p"/blocks/#{block}"}>Показать</.link>
+      </div>
+      <.link patch={~p"/blocks/#{block}/edit"}>Ред.</.link>
+    </:action>
+    <:action :let={{id, block}}>
+      <.link
+        phx-click={JS.push("delete", value: %{id: block.id}) |> hide("##{id}")}
+        data-confirm="Уверен?"
+      >
+        Удалить
+      </.link>
+    </:action>
+  </.table>
+
+  <.modal
+    :if={@live_action in [:new, :edit]}
+    id="block-modal"
+    show
+    on_cancel={JS.patch(~p"/blocks")}
+  >
+    <.live_component
+      module={KnowlibWeb.BlockLive.FormComponent}
+      id={@block.id || :new}
+      title={@page_title}
+      action={@live_action}
+      block={@block}
+      patch={~p"/blocks"}
+      current_user={@current_user}
+    />
+  </.modal>
+</div>
