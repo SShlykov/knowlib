@@ -13,8 +13,8 @@
   </head>
   <body>
     <.topbar current_user={@current_user} />
-    <.sidebar current_user={@current_user} />
-    <div class="h-[100vh] overflow-y-auto py-4 bg-gray-50 pt-[50px] pl-[250px]">
+    <.sidebar :if={@current_user} current_user={@current_user} />
+    <div :if={@current_user} class="h-[100vh] overflow-y-auto py-4 bg-gray-50 pt-[50px] pl-[250px]">
       {@inner_content}
     </div>
   </body>
