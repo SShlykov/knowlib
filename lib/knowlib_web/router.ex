@@ -3,11 +3,21 @@ defmodule KnowlibWeb.Router do
 
   import KnowlibWeb.Auth.UserAuth
 
-  pipeline :browser do
+  pipeline :browser_inner do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {KnowlibWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug :fetch_current_user
+  end
+
+  pipeline :browser_outer do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {KnowlibWeb.Layouts, :outer}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
@@ -18,13 +28,13 @@ defmodule KnowlibWeb.Router do
   end
 
   scope "/", KnowlibWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
+    pipe_through [:browser_inner, :redirect_if_user_is_authenticated]
 
     live "/", Live.Page
   end
 
   scope "/", KnowlibWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser_inner, :require_authenticated_user]
 
     live "/home", Live.Home
 
@@ -57,7 +67,7 @@ defmodule KnowlibWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through :browser
+      pipe_through :browser_inner
 
       live_dashboard "/dashboard", metrics: KnowlibWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
@@ -67,7 +77,7 @@ defmodule KnowlibWeb.Router do
   ## Authentication routes
 
   scope "/auth", KnowlibWeb.Auth, as: :auth do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
+    pipe_through [:browser_outer, :redirect_if_user_is_authenticated]
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{KnowlibWeb.Auth.UserAuth, :redirect_if_user_is_authenticated}] do
@@ -81,7 +91,7 @@ defmodule KnowlibWeb.Router do
   end
 
   scope "/auth", KnowlibWeb.Auth, as: :auth do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser_inner, :require_authenticated_user]
 
     live_session :require_authenticated_user,
       on_mount: [{KnowlibWeb.Auth.UserAuth, :ensure_authenticated}] do
@@ -91,7 +101,7 @@ defmodule KnowlibWeb.Router do
   end
 
   scope "/auth", KnowlibWeb.Auth, as: :auth do
-    pipe_through [:browser]
+    pipe_through [:browser_inner]
 
     delete "/users/log_out", UserSessionController, :delete
 

@@ -4,7 +4,7 @@ defmodule KnowlibWeb.Topbar do
 
   def topbar(assigns) do
     ~H"""
-    <header class="fixed top-0 left-0 w-full bg-white border-b border-gray-300 px-4 sm:px-6 lg:px-8">
+    <header class="top-0 left-0 w-full bg-white border-b border-gray-300 px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
         <div class="flex items-center gap-4">
           <a href={~p"/"}>
@@ -35,6 +35,12 @@ defmodule KnowlibWeb.Topbar do
               </.link>
             </div>
           <% else %>
+            <.link
+              href={~p"/auth/users/register"}
+              class="rounded-full border border-gray-700 py-2 px-4 hover:bg-gray-300 hover:text-zinc-700"
+            >
+              регистрация
+            </.link>
             <.link
               href={~p"/auth/users/log_in"}
               class="rounded-full border border-gray-700 py-2 px-4 hover:bg-gray-300 hover:text-zinc-700"

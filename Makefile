@@ -3,6 +3,10 @@ ifneq (,$(wildcard .env))
     export $(shell sed 's/=.*//' .env)
 endif
 
+.PHONY=init
+init:
+	mix.deps.get && make run
+
 .PHONY=run
 run: migrate
 	iex -S mix phx.server

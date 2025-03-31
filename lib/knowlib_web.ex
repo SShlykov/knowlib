@@ -91,6 +91,7 @@ defmodule KnowlibWeb do
       import KnowlibWeb.CoreComponents
       import KnowlibWeb.Topbar
       import KnowlibWeb.Sidebar
+      import KnowlibWeb.MenuContainer
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
