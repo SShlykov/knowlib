@@ -41,7 +41,12 @@ defmodule KnowlibWeb.BlockLive.Index do
 
   @impl true
   def handle_info({KnowlibWeb.BlockLive.FormComponent, {:saved, block}}, socket) do
-    {:noreply, stream_insert(socket, :blocks, block)}
+    socket =
+      socket
+      |> update_user()
+      |> stream_insert(:blocks, block)
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -49,6 +54,17 @@ defmodule KnowlibWeb.BlockLive.Index do
     block = Knowledge.get_block!(id)
     {:ok, _} = Knowledge.delete_block(block)
 
-    {:noreply, stream_delete(socket, :blocks, block)}
+    socket =
+      socket
+      |> update_user()
+      |> stream_delete(:blocks, block)
+
+    {:noreply, socket}
+  end
+
+  defp update_user(socket) do
+    user = Knowlib.Accounts.get_user!(socket.assigns.current_user.id)
+
+    assign(socket, current_user: user)
   end
 end

@@ -1,3 +1,4 @@
+<.sidebar :if={Map.get(assigns, :current_user)} current_user={@current_user} />
 <main class="sm:px-6 lg:px-8">
   <.flash_group flash={@flash} />
   {@inner_content}
