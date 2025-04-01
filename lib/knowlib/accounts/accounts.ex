@@ -58,7 +58,7 @@ defmodule Knowlib.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload([:blocks, :pages])
 
   ## User registration
 

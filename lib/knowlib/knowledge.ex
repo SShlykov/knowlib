@@ -6,7 +6,7 @@ defmodule Knowlib.Knowledge do
   import Ecto.Query, warn: false
   alias Knowlib.Repo
 
-  alias Knowlib.Knowledge.Block
+  alias Knowlib.Knowledge.{Block, Page}
 
   @doc """
   Returns the list of blocks.
@@ -90,6 +90,8 @@ defmodule Knowlib.Knowledge do
 
   """
   def delete_block(%Block{} = block) do
+    Repo.delete_all(from p in Page, where: p.block_id == ^block.id)
+
     Repo.delete(block)
   end
 
