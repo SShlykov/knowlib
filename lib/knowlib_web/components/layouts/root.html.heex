@@ -12,8 +12,7 @@
     </script>
   </head>
   <body>
-    <.topbar current_user={@current_user} />
-    <div class={"h-[100vh] overflow-y-auto py-4 bg-gray-50 " <> if(@current_user != nil, do: "pt-[50px] pl-[250px]", else: "pt-[90px]")}>
+    <div >
       {@inner_content}
     </div>
   </body>

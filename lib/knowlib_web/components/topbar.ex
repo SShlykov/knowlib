@@ -19,6 +19,30 @@ defmodule KnowlibWeb.Topbar do
             </div>
             <div>
               <.link
+                href={~p"/home"}
+                class="rounded-full border border-gray-700 py-2 px-4 hover:bg-gray-300 hover:text-zinc-700"
+              >
+                главная
+              </.link>
+            </div>
+            <div>
+              <.link
+                href={~p"/blocks"}
+                class="rounded-full border border-gray-700 py-2 px-4 hover:bg-gray-300 hover:text-zinc-700"
+              >
+                блоки
+              </.link>
+            </div>
+            <div>
+              <.link
+                href={~p"/pages"}
+                class="rounded-full border border-gray-700 py-2 px-4 hover:bg-gray-300 hover:text-zinc-700"
+              >
+                страницы
+              </.link>
+            </div>
+            <div>
+              <.link
                 href={~p"/auth/users/settings"}
                 class="rounded-full border border-gray-700 py-2 px-4 hover:bg-gray-300 hover:text-zinc-700"
               >
