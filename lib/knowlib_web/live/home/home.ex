@@ -1,7 +1,7 @@
 defmodule KnowlibWeb.Live.Home do
   use KnowlibWeb, :live_view
 
-  import KnowlibWeb.Components.ChatBuble
+  import KnowlibWeb.Components.Room
 
   def mount(_params, session, socket) do
     current_user = Knowlib.Accounts.get_user_by_session_token(session["user_token"])
@@ -9,35 +9,41 @@ defmodule KnowlibWeb.Live.Home do
     socket =
       socket
       |> assign(:current_user, current_user)
-      |> assign(:messages, [
+      |> stream(:messages, [
         %{icon:  "https://cdn-icons-png.flaticon.com/512/2021/2021646.png",
           time:  now(),
           name:  "system",
           align: "right",
           text:  "Введите свое сообщение",
-          id:    "1"
-        },
-        %{
-          icon:  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUW0u5Eiiy3oM6wcpeEE6sXCzlh8G-tX1_Iw&s",
-          time:  now(),
-          name:  current_user.email,
-          align: "left",
-          text:  "Три брата получили 24 яблока, причём. каждому досталось столько, сколько ему было лет. Младший получил меньше всех, остался недоволен и предложил братьям следующее: «Я оставлю себе только половину своих яблок, а остальные разделю между вами поровну. Затем пусть так поступит средний, а за ним и старший». Братья, не раздумывая, согласились, но прогадали: в результате яблок у всех оказалось поровну. Сколько лет было каждому из братьев?",
-          id:     "2"
+          id:    rand_string()
         }
       ])
 
     {:ok, socket}
   end
 
-  def handle_event("send_message", %{"message" => message}, socket) do
-    {:noreply, add_message(message, socket)}
+  def handle_event("send_message", %{"message" => client_message}, socket) do
+    socket =
+      socket
+      |> stream_insert(:messages, message(client_message, socket.assigns.current_user.email))
+
+    send(self(), {:send_system_message, "Думаю..."})
+
+    {:noreply, socket}
   end
 
-  def add_message(client_message, socket) do
-    messages = socket.assigns.messages ++ [message(client_message, socket.assigns.current_user.email)]
+  def handle_event("delete_message", %{"id" => id}, socket) do
+    {:noreply, stream_delete(socket, :messages, %{id: id})}
+  end
 
-    assign(socket, :messages, messages)
+  def handle_info({:send_system_message, system_message}, socket) do
+    :timer.sleep(2000)
+
+    socket =
+      socket
+      |> stream_insert(:messages, message(system_message))
+
+    {:noreply, socket}
   end
 
   def message(message, name) do
