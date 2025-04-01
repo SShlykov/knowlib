@@ -1,5 +1,9 @@
-<.sidebar :if={Map.get(assigns, :current_user)} current_user={@current_user} />
-<main class="sm:px-6 lg:px-8">
-  <.flash_group flash={@flash} />
-  {@inner_content}
-</main>
+<.topbar current_user={@current_user} />
+<div class={"h-screen overflow-y-auto overflow-y-auto py-4 bg-gray-50 " <> if(@current_user != nil, do: "pt-[50px] pl-[250px]", else: "pt-[90px]")}>
+  <.sidebar :if={Map.get(assigns, :current_user)} current_user={@current_user} />
+  <main class="w-full h-full">
+    <.flash_group flash={@flash} />
+    {@inner_content}
+  </main>
+</div>
+
