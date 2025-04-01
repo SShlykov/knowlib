@@ -45,10 +45,6 @@ defmodule KnowlibWeb.Router do
       live "/:id", PageLive.Show, :show
       live "/:id/show/edit", PageLive.Show, :edit
     end
-
-    scope "/chat" do
-      live "/", PageLive.Index, :index
-    end
   end
 
   # Other scopes may use custom stacks.

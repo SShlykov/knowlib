@@ -31,7 +31,6 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   def handle_event("send_message", %{"message" => message}, socket) do
-    IO.inspect(message)
     {:noreply, add_message(message, socket)}
   end
 
