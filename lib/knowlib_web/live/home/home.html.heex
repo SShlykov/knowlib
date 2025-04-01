@@ -1,4 +1,13 @@
 <div class="h-full flex justify-center">
+
+  <.sidebar
+    page_title={@page_title}
+    block={@block}
+    blocks={@streams.blocks}
+    live_action={@live_action}
+    current_user={@current_user}
+    />
+
   <div class="h-full flex flex-col justify-between items-center w-full gap-8">
     <.list_messages messages={@streams.messages} />
 

@@ -23,6 +23,7 @@ defmodule Knowlib.Knowledge do
 
   def list_blocks(user_id: user_id) when is_binary(user_id) do
     Repo.all(from b in Block, where: b.user_id == ^user_id)
+    |> Repo.preload([:pages])
   end
 
   @doc """

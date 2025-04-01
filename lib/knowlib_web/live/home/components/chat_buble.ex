@@ -4,7 +4,7 @@ defmodule KnowlibWeb.Components.ChatBuble do
 
   alias Phoenix.LiveView.JS
 
-  def chatBuble(assigns) do
+  def chat_buble(assigns) do
     ~H"""
     <div class={"flex items-start gap-2.5 #{if(@align == "right", do: "flex-row-reverse", else: "")}"}>
       <img class="w-8 h-8 rounded-full" src={@icon} alt="Jese image">

@@ -2,6 +2,8 @@ defmodule KnowlibWeb.Live.Home do
   use KnowlibWeb, :live_view
 
   import KnowlibWeb.Components.Room
+  alias Knowlib.Knowledge
+  alias Knowlib.Knowledge.Block
 
   def mount(_params, session, socket) do
     current_user = Knowlib.Accounts.get_user_by_session_token(session["user_token"])
@@ -22,6 +24,32 @@ defmodule KnowlibWeb.Live.Home do
     {:ok, socket}
   end
 
+  @impl true
+  def handle_params(params, _url, socket) do
+    socket =
+      socket
+      |> apply_action(socket.assigns.live_action, params)
+      |> stream(:blocks, Knowledge.list_blocks(user_id: socket.assigns.current_user.id))
+
+    {:noreply, socket}
+  end
+
+  def handle_event("search_block", %{"search" => search}, socket) do
+    all_blocks = Knowledge.list_blocks(user_id: socket.assigns.current_user.id)
+
+    filtred_blocks =
+      all_blocks
+      |> Enum.filter(fn %{name: name} -> String.contains?(name, search) end)
+
+    socket =
+      socket
+      |> remove_blocks(all_blocks)
+      |> add_blocks(filtred_blocks)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("send_message", %{"message" => client_message}, socket) do
     socket =
       socket
@@ -32,10 +60,12 @@ defmodule KnowlibWeb.Live.Home do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_event("delete_message", %{"id" => id}, socket) do
     {:noreply, stream_delete(socket, :messages, %{id: id})}
   end
 
+  @impl true
   def handle_info({:send_system_message, system_message}, socket) do
     :timer.sleep(2000)
 
@@ -72,4 +102,35 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   def now, do: DateTime.utc_now() |> Calendar.strftime("%H:%M")
+
+  defp apply_action(socket, :edit, %{"id" => id}) do
+    socket
+    |> assign(:page_title, "Редактировать")
+    |> assign(:block, Knowledge.get_block!(id))
+  end
+
+  defp apply_action(socket, :new, _params) do
+    socket
+    |> assign(:page_title, "Новый блок")
+    |> assign(:block, %Block{})
+  end
+
+  defp apply_action(socket, :index, _params) do
+    socket
+    |> assign(:page_title, "Список блоков")
+    |> assign(:block, nil)
+  end
+
+
+  defp remove_blocks(socket, blocks) do
+    Enum.reduce(blocks, socket, fn block, acc ->
+      stream_delete(acc, :blocks, block)
+    end)
+  end
+
+  defp add_blocks(socket, blocks) do
+    Enum.reduce(blocks, socket, fn block, acc ->
+      stream_insert(acc, :blocks, block)
+    end)
+  end
 end

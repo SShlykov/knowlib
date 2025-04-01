@@ -26,7 +26,12 @@ defmodule KnowlibWeb.Router do
   scope "/", KnowlibWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    live "/home", Live.Home
+    scope "/home", Live do
+      live "/", Home, :index
+
+      live "/blocks/new", Home, :new
+      live "/blocks/:id/edit", Home, :edit
+    end
 
     scope "/blocks" do
       live "/", BlockLive.Index, :index

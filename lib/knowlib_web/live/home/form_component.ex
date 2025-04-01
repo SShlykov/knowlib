@@ -1,4 +1,4 @@
-defmodule KnowlibWeb.BlockLive.FormComponent do
+defmodule KnowlibWeb.Live.Block.FormComponent do
   use KnowlibWeb, :live_component
 
   alias Knowlib.Knowledge
@@ -57,8 +57,6 @@ defmodule KnowlibWeb.BlockLive.FormComponent do
   defp save_block(socket, :edit, block_params) do
     case Knowledge.update_block(socket.assigns.block, block_params) do
       {:ok, block} ->
-        notify_parent({:saved, block})
-
         {:noreply,
          socket
          |> put_flash(:info, "Block updated successfully")
@@ -72,11 +70,9 @@ defmodule KnowlibWeb.BlockLive.FormComponent do
   defp save_block(socket, :new, block_params) do
     case Knowledge.create_block(block_params) do
       {:ok, block} ->
-        notify_parent({:saved, block})
-
         {:noreply,
          socket
-         |> put_flash(:info, "Block created successfully")
+         |> put_flash(:info, "Блок создан успешно")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
