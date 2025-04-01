@@ -11,7 +11,8 @@ defmodule Knowlib.Application do
       {DNSCluster, query: Application.get_env(:knowlib, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Knowlib.PubSub},
       {Finch, name: Knowlib.Finch},
-      KnowlibWeb.Endpoint
+      KnowlibWeb.Endpoint,
+      {Task, fn -> Rag.QdrantInitializer.init_collection() end}
     ]
 
     opts = [strategy: :one_for_one, name: Knowlib.Supervisor]

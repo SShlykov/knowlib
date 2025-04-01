@@ -3,15 +3,15 @@ defmodule KnowlibWeb.Auth.UserLoginLive do
 
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm">
+    <div class="mx-auto max-w-md bg-white p-8 rounded-lg">
       <.header class="text-center">
-        Log in to account
+      Войти в аккаунт
         <:subtitle>
-          Don't have an account?
+          Нет аккаунта?
           <.link navigate={~p"/auth/users/register"} class="font-semibold text-brand hover:underline">
-            Sign up
+          Регайся
           </.link>
-          for an account now.
+          прям ща.
         </:subtitle>
       </.header>
 

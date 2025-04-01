@@ -32,6 +32,7 @@ defmodule Knowlib.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:tesla, "~> 1.8"},
       {:pbkdf2_elixir, "~> 2.0"},
       {:phoenix, "~> 1.7.21"},
       {:phoenix_ecto, "~> 4.5"},
