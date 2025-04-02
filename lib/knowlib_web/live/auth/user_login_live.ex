@@ -5,11 +5,11 @@ defmodule KnowlibWeb.Auth.UserLoginLive do
     ~H"""
     <div class="mx-auto max-w-md bg-white p-8 rounded-lg">
       <.header class="text-center">
-      Войти в аккаунт
+        Войти в аккаунт
         <:subtitle>
           Нет аккаунта?
           <.link navigate={~p"/auth/users/register"} class="font-semibold text-brand hover:underline">
-          Регайся
+            Регайся
           </.link>
           прям ща.
         </:subtitle>

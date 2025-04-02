@@ -1,5 +1,7 @@
-import Resize from "./Resize.js"
+import Resize from "./Resize.js";
+import ChartJS from "./ChartJS.js";
 
 export default {
-  Resize
-}
+  Resize,
+  ChartJS,
+};

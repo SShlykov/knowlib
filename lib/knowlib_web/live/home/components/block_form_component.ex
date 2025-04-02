@@ -23,7 +23,7 @@ defmodule KnowlibWeb.Live.Block.FormComponent do
         <.input field={@form[:description]} type="text" label="Description" />
         <.input field={@form[:icon]} type="text" label="Icon" />
         <:actions>
-          <.button phx-disable-with="Saving...">Save Block</.button>
+          <.button type="submit" phx-disable-with="Saving...">Save Block</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -56,7 +56,7 @@ defmodule KnowlibWeb.Live.Block.FormComponent do
 
   defp save_block(socket, :edit, block_params) do
     case Knowledge.update_block(socket.assigns.block, block_params) do
-      {:ok, block} ->
+      {:ok, _} ->
         {:noreply,
          socket
          |> put_flash(:info, "Block updated successfully")
@@ -69,7 +69,7 @@ defmodule KnowlibWeb.Live.Block.FormComponent do
 
   defp save_block(socket, :new, block_params) do
     case Knowledge.create_block(block_params) do
-      {:ok, block} ->
+      {:ok, _} ->
         {:noreply,
          socket
          |> put_flash(:info, "Блок создан успешно")

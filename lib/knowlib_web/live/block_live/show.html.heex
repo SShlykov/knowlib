@@ -1,11 +1,6 @@
 <.header>
   Block {@block.id}
   <:subtitle>This is a block record from your database.</:subtitle>
-  <:actions>
-    <.link patch={~p"/blocks/#{@block}/show/edit"} phx-click={JS.push_focus()}>
-      <.button>Edit block</.button>
-    </.link>
-  </:actions>
 </.header>
 
 <.list>
@@ -16,7 +11,12 @@
 
 <.back navigate={~p"/blocks"}>Back to blocks</.back>
 
-<.modal :if={@live_action == :edit} id="block-modal" show on_cancel={JS.patch(~p"/blocks/#{@block}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="block-modal"
+  show
+  on_cancel={JS.patch(~p"/blocks/#{@block}")}
+>
   <.live_component
     module={KnowlibWeb.BlockLive.FormComponent}
     id={@block.id}

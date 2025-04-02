@@ -6,16 +6,17 @@ defmodule KnowlibWeb.Live.Home do
   alias Knowlib.Knowledge
   alias Knowlib.Knowledge.{Block, Page}
 
+  @impl true
   def mount(_params, session, socket) do
     current_user = Knowlib.Accounts.get_user_by_session_token(session["user_token"])
 
     init_message = %{
-      icon:  "https://cdn-icons-png.flaticon.com/512/2021/2021646.png",
-      time:  now(),
-      name:  "system",
+      icon: "https://cdn-icons-png.flaticon.com/512/2021/2021646.png",
+      time: now(),
+      name: "system",
       align: "right",
-      text:  "Введите свое сообщение",
-      id:    rand_string()
+      text: "Введите свое сообщение",
+      id: rand_string()
     }
 
     socket =
@@ -32,10 +33,11 @@ defmodule KnowlibWeb.Live.Home do
   @impl true
   def handle_params(params, _url, socket) do
     blocks = Knowledge.list_blocks(user_id: socket.assigns.current_user.id)
+
     block_knowledge_count =
       blocks
       |> Enum.map(fn %{name: name, pages: pages} -> %{name: name, count: length(pages)} end)
-      |> Enum.sort(& &1.count > &2.count)
+      |> Enum.sort(&(&1.count > &2.count))
       |> Enum.take(5)
 
     socket =
@@ -73,16 +75,19 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   @impl true
-  def handle_event("send_message", %{"message" => client_message}, socket) when client_message != "" do
+  def handle_event("send_message", %{"message" => client_message}, socket)
+      when client_message != "" do
     self = self()
 
     spawn(fn ->
-      Rag.Agent.run_stream("ответь в 100 словах: " <> client_message, fn
+      Rag.Agent.run_stream(client_message, fn
         %{"choices" => [%{"delta" => %{"finish_reason" => "stop"}}]} ->
           send(self, :done_upload)
           :ok
+
         %{"choices" => [%{"delta" => %{"content" => content}}]} when content != "" ->
           send(self, {:send_ai_responce_message, content})
+
         _any ->
           :ok
       end)
@@ -100,12 +105,40 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   @impl true
+  def handle_event("delete_block", %{"id" => id}, socket) do
+    block = Knowledge.get_block!(id)
+    {:ok, _} = Knowledge.delete_block(block)
+
+    socket =
+      socket
+      |> redirect(to: "/home")
+
+    {:noreply, socket}
+  end
+
+
+  @impl true
+  def handle_event("delete_page", %{"id" => id}, socket) do
+    page = Knowledge.get_page!(id)
+    {:ok, _} = Knowledge.delete_page(page)
+
+    socket =
+      socket
+      |> redirect(to: "/home")
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("delete_message", %{"id" => id}, socket) do
     {:noreply, stream_delete(socket, :messages, %{id: id})}
   end
 
   @impl true
-  def handle_info({:send_ai_responce_message, system_message}, %{assigns: %{last_message: %{name: "system"} = msg}} = socket) do
+  def handle_info(
+        {:send_ai_responce_message, system_message},
+        %{assigns: %{last_message: %{name: "system"} = msg}} = socket
+      ) do
     new_message = Map.update!(msg, :text, fn text -> text <> system_message end)
 
     socket =
@@ -118,7 +151,10 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   @impl true
-  def handle_info({:send_ai_responce_message, system_message}, %{assigns: %{last_message: msg}} = socket) do
+  def handle_info(
+        {:send_ai_responce_message, system_message},
+        %{assigns: %{last_message: _}} = socket
+      ) do
     message = system_message(system_message)
 
     socket =
@@ -139,7 +175,12 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   def user_message(message, name) do
-    message("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUW0u5Eiiy3oM6wcpeEE6sXCzlh8G-tX1_Iw&s", "left", message, name)
+    message(
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUW0u5Eiiy3oM6wcpeEE6sXCzlh8G-tX1_Iw&s",
+      "left",
+      message,
+      name
+    )
   end
 
   def system_message(message) do
@@ -148,12 +189,12 @@ defmodule KnowlibWeb.Live.Home do
 
   def message(icon, align, message, name) do
     %{
-      icon:  icon,
-      time:  now(),
-      name:  name,
+      icon: icon,
+      time: now(),
+      name: name,
       align: align,
-      text:  message,
-      id:    rand_string()
+      text: message,
+      id: rand_string()
     }
   end
 
@@ -190,18 +231,18 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   defp apply_action(socket, :edit_page, %{"id" => id}) do
-      socket
-      |> assign(:page_title, "Редактировать")
-      |> assign(:block, nil)
-      |> assign(:page, Knowledge.get_page!(id))
-    end
+    socket
+    |> assign(:page_title, "Редактировать")
+    |> assign(:block, nil)
+    |> assign(:page, Knowledge.get_page!(id))
+  end
 
-    defp apply_action(socket, :new_page, _params) do
-      socket
-      |> assign(:page_title, "Новая страница")
-      |> assign(:block, nil)
-      |> assign(:page, %Page{})
-    end
+  defp apply_action(socket, :new_page, _params) do
+    socket
+    |> assign(:page_title, "Новая страница")
+    |> assign(:block, nil)
+    |> assign(:page, %Page{})
+  end
 
   defp apply_action(socket, :index, _params) do
     socket
@@ -220,5 +261,65 @@ defmodule KnowlibWeb.Live.Home do
     Enum.reduce(blocks, socket, fn block, acc ->
       stream_insert(acc, :blocks, block)
     end)
+  end
+
+  defp chart_config(:bar_chart, count_data) do
+   %{
+      type: "bar",
+      data: %{
+        labels: Enum.map(count_data, & &1.name),
+        datasets: [
+          %{
+            label: "Количество знаний",
+            data: Enum.map(count_data, & &1.count),
+            backgroundColor: "rgba(123,123,255,0.5)",
+            borderColor: "rgba(0,123,255,1)",
+            borderWidth: 1
+          }
+        ]
+      },
+      options: %{
+        indexAxis: "y",
+        scales: %{
+          x: %{
+            beginAtZero: true
+          }
+        }
+      }
+    }
+    |> Jason.encode!()
+  end
+
+  defp chart_config(:doughnut, data) do
+   %{
+      type: "pie",
+      data: %{
+        labels: ["Топ блоки", "Другие блоки"],
+        datasets: [
+          %{
+            label: "Количество знаний",
+            data: data,
+            backgroundColor: [
+                "rgba(75, 192, 192, 0.5)",
+                "rgba(255, 99, 132, 0.5)"
+              ],
+            borderColor: [
+                "rgba(75, 192, 192, 1)",
+                "rgba(255, 99, 132, 1)"
+              ],
+            borderWidth: 1
+          }
+        ]
+      },
+      options: %{
+        responsive: true,
+        plugins: %{
+          legend: %{
+            position: "top"
+          }
+        }
+      }
+    }
+    |> Jason.encode!()
   end
 end

@@ -35,7 +35,12 @@ defmodule Knowlib.KnowledgeTest do
 
     test "update_block/2 with valid data updates the block" do
       block = block_fixture()
-      update_attrs = %{name: "some updated name", description: "some updated description", icon: "some updated icon"}
+
+      update_attrs = %{
+        name: "some updated name",
+        description: "some updated description",
+        icon: "some updated icon"
+      }
 
       assert {:ok, %Block{} = block} = Knowledge.update_block(block, update_attrs)
       assert block.name == "some updated name"

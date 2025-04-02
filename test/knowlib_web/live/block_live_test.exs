@@ -5,7 +5,11 @@ defmodule KnowlibWeb.BlockLiveTest do
   import Knowlib.KnowledgeFixtures
 
   @create_attrs %{name: "some name", description: "some description", icon: "some icon"}
-  @update_attrs %{name: "some updated name", description: "some updated description", icon: "some updated icon"}
+  @update_attrs %{
+    name: "some updated name",
+    description: "some updated description",
+    icon: "some updated icon"
+  }
   @invalid_attrs %{name: nil, description: nil, icon: nil}
 
   defp create_block(_) do

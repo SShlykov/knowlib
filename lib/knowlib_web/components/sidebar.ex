@@ -38,7 +38,7 @@ defmodule KnowlibWeb.Sidebar do
           >
             <div class="flex flex-grow justify-between items-center pr-3">
               <div class="font-semibold text-gray-700">
-                <%= b.name %>
+                {b.name}
               </div>
               <.icon name="hero-eye-solid" class="h-3 translate-y-[1px] w-3 text-gray-500" />
             </div>
@@ -50,32 +50,26 @@ defmodule KnowlibWeb.Sidebar do
               >
                 <.icon name="hero-pencil-solid" class="h-3 w-3" />
               </.link>
-              <.link
-                patch={~p"/home/blocks/#{b.id}"}
-                method="delete"
+              <div
+                phx-click={JS.push("delete_block", value: %{id: b.id})}
                 data-confirm="Точно удалить блок?"
                 class="text-red-600 hover:text-red-800 text-sm"
                 phx-stop-propagation
               >
                 <.icon name="hero-trash-solid" class="h-3 w-3" />
-              </.link>
+              </div>
             </div>
           </div>
 
-          <ul
-            id={"pages-for-block-#{b.id}"}
-            class="hidden bg-gray-50"
-          >
+          <ul id={"pages-for-block-#{b.id}"} class="hidden bg-gray-50 text-sm pl-4">
             <li
               :for={page <- b.pages}
               class="flex items-center justify-between px-4 py-2 border-t border-gray-200"
             >
               <.link href={~p"/home/chat/#{page.id}"} class="text-gray-800 hover:underline">
-                <%= page.title %>
+                {page.title}
               </.link>
               <div class="flex space-x-3">
-
-
                 <.link
                   patch={~p"/home/pages/#{page.id}/edit"}
                   class="text-blue-600 hover:text-blue-800 text-sm"
@@ -83,15 +77,14 @@ defmodule KnowlibWeb.Sidebar do
                 >
                   <.icon name="hero-pencil-solid" class="h-3 w-3" />
                 </.link>
-                <.link
-                  patch={~p"/home/pages/#{page.id}"}
-                  method="delete"
+                <div
+                  phx-click={JS.push("delete_page", value: %{id: page.id})}
                   data-confirm="Точно удалить страницу?"
                   class="text-red-600 hover:text-red-800 text-sm"
                   phx-stop-propagation
                 >
                   <.icon name="hero-trash-solid" class="h-3 w-3" />
-                </.link>
+                </div>
               </div>
             </li>
           </ul>
@@ -126,5 +119,4 @@ defmodule KnowlibWeb.Sidebar do
     </div>
     """
   end
-
 end

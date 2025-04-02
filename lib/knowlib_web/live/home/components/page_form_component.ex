@@ -20,10 +20,15 @@ defmodule KnowlibWeb.Live.Page.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:order]} value={0} type="number" label="Очередь" />
-        <.input field={@form[:block_id]} type="select" label="Вебери блок знаний" options={
-          Knowlib.Knowledge.list_blocks(user_id: @current_user.id)
-          |> Enum.map(& &1.name)
-        } />
+        <.input
+          field={@form[:block_id]}
+          type="select"
+          label="Вебери блок знаний"
+          options={
+            Knowlib.Knowledge.list_blocks(user_id: @current_user.id)
+            |> Enum.map(& &1.name)
+          }
+        />
 
         <.input field={@form[:title]} type="text" label="Заголовок" />
         <.input field={@form[:text]} type="textarea" label="Текст" />
@@ -81,10 +86,12 @@ defmodule KnowlibWeb.Live.Page.FormComponent do
   defp save_page(socket, :new_page, page_params) do
     case Knowledge.create_page(page_params) do
       {:ok, page} ->
+        Rag.QdrantClient.upsert_text(page.block_id, page.id, page.text)
+
         {:noreply,
          socket
          |> put_flash(:info, "Page created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> redirect(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}

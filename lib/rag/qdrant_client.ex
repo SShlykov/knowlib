@@ -73,7 +73,9 @@ defmodule Rag.QdrantClient do
       Logger.info("Inserting #{block_id}:#{text_id}")
 
       case upsert_text(block_id, text_id, text) do
-        {:ok, _} -> :ok
+        {:ok, _} ->
+          :ok
+
         any ->
           Logger.error("Some inserts failed: #{inspect(any)}")
           {:error, any}
@@ -84,9 +86,8 @@ defmodule Rag.QdrantClient do
   def search(query, limit \\ 5) do
     with {:ok, vector} <- OpenAIClient.embed(query),
          {:ok, %Tesla.Env{body: %{"result" => results}}} <- search_vector(vector, limit) do
-
       results
-      |> Enum.map( fn %{"payload" => payload, "score" => score} ->
+      |> Enum.map(fn %{"payload" => payload, "score" => score} ->
         %{text: payload["text"], block_id: payload["block_id"], score: score}
       end)
     end

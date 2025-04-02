@@ -34,11 +34,11 @@ defmodule Rag.OpenAIClient do
       stream: true
     }
 
-    {:ok, env} = Tesla.post(client, "/chat/completions", data, opts: [adapter: [response: :stream]])
-    |> IO.inspect(label: "stream")
+    {:ok, env} =
+      Tesla.post(client, "/chat/completions", data, opts: [adapter: [response: :stream]])
 
     env.body
-    |> Stream.each(& on_chunk.(&1))
+    |> Stream.each(&on_chunk.(&1))
     |> Stream.run()
   end
 
@@ -83,6 +83,9 @@ defmodule Rag.OpenAIClient do
   end
 
   defp put_chunck(%{"choices" => [%{"delta" => %{"finish_reason" => "stop"}}]}), do: :ok
-  defp put_chunck(%{"choices" => [%{"delta" => %{"content" => content}}]}) when content != "", do: IO.puts(content)
+
+  defp put_chunck(%{"choices" => [%{"delta" => %{"content" => content}}]}) when content != "",
+    do: IO.puts(content)
+
   defp put_chunck(_any), do: :ok
 end

@@ -5,16 +5,25 @@
     blocks={@streams.blocks}
     live_action={@live_action}
     current_user={@current_user}
-    />
+  />
 
   <div class="border rounded-md h-[250px] m-4 bg-white flex justify-between flex-row">
-    <div class="w-full border-r border-slate-200 flex items-center justify-center">Всего: {@total_blocks}</div>
-    <div class="w-full border-r border-slate-200 flex items-center justify-center flex-col">
-      Топ 5 блоков по знаниям:
-      <div :for={%{name: name, count: count} <- @block_knowledge_count}>{name}: {count}</div>
+    <div class="w-full border-r border-slate-200 flex items-center flex-col justify-center p-4">
+      <div class="font-bold mt-2">Топ 5\Все</div>
+      <canvas id="ch-1" phx-update="ignore" phx-hook="ChartJS"
+            data-chart-config={chart_config(:doughnut, [@total_blocks, length(@block_knowledge_count)])}
+            width="300" height="300"
+            style="max-width: 100%;"></canvas>
     </div>
-    <div class="w-full border-r border-slate-200 flex items-center justify-center"></div>
-    <div class="w-full flex items-center justify-center"></div>
+    <div class="w-full flex items-center justify-center flex-col py-2">
+      <div class="font-bold mt-2">Топ 5 блоков</div>
+      <div class="chart-container" style="max-width: 600px; margin: auto;">
+        <canvas id="el5" phx-update="ignore" phx-hook="ChartJS"
+                data-chart-config={chart_config(:bar_chart, @block_knowledge_count)}
+                width="300" height="210"
+                style="max-width: 100%;"></canvas>
+      </div>
+    </div>
   </div>
 
   <div class="h-full flex flex-col justify-between items-center w-full gap-8">
@@ -22,16 +31,35 @@
 
     <div class="flex w-full max-w-[700px] relative z-5">
       <div class="absolute right-0 left-0 bottom-0 w-full">
-        <form id="send_message_form" phx-submit="send_message" class="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50">
+        <form
+          id="send_message_form"
+          phx-submit="send_message"
+          class="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50"
+        >
           <div class="px-4 py-2 bg-white rounded-t-lg">
             <label for="message" class="sr-only">Your comment</label>
-            <textarea phx-hook="Resize" rows="1" id="message" name="message" rows="4" class="w-full resize-none px-0 text-sm text-gray-900 bg-white border-0 focus:ring-0" placeholder="Введите запрос..." required ></textarea>
+            <textarea
+              phx-hook="Resize"
+              rows="1"
+              id="message"
+              name="message"
+              rows="4"
+              class="w-full resize-none px-0 text-sm text-gray-900 bg-white border-0 focus:ring-0"
+              placeholder="Введите запрос..."
+              required
+            ></textarea>
           </div>
           <div class="flex items-center justify-between px-3 py-2 border-t border-gray-200">
-            <button type="submit" class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 hover:bg-blue-800">
+            <button
+              type="submit"
+              class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 hover:bg-blue-800"
+            >
               Отправить запрос
             </button>
-            <.link patch={~p"/home/pages/new"} class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-green-700 rounded-lg focus:ring-4 focus:ring-green-200 hover:bg-green-800">
+            <.link
+              patch={~p"/home/pages/new"}
+              class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-green-700 rounded-lg focus:ring-4 focus:ring-green-200 hover:bg-green-800"
+            >
               Создать страницу
             </.link>
           </div>
