@@ -4,7 +4,7 @@ defmodule KnowlibWeb.Live.Home do
 
   import KnowlibWeb.Components.Room
   alias Knowlib.Knowledge
-  alias Knowlib.Knowledge.Block
+  alias Knowlib.Knowledge.{Block, Page}
 
   def mount(_params, session, socket) do
     current_user = Knowlib.Accounts.get_user_by_session_token(session["user_token"])
@@ -159,20 +159,36 @@ defmodule KnowlibWeb.Live.Home do
     socket
     |> assign(:page_title, "Редактировать")
     |> assign(:block, Knowledge.get_block!(id))
+    |> assign(:page, nil)
   end
 
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "Новый блок")
     |> assign(:block, %Block{})
+    |> assign(:page, nil)
   end
+
+  defp apply_action(socket, :edit_page, %{"id" => id}) do
+      socket
+      |> assign(:page_title, "Редактировать")
+      |> assign(:block, nil)
+      |> assign(:page, Knowledge.get_page!(id))
+    end
+
+    defp apply_action(socket, :new_page, _params) do
+      socket
+      |> assign(:page_title, "Новая страница")
+      |> assign(:block, nil)
+      |> assign(:page, %Page{})
+    end
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Список блоков")
+    |> assign(:page_title, "Главная")
     |> assign(:block, nil)
+    |> assign(:page, nil)
   end
-
 
   defp remove_blocks(socket, blocks) do
     Enum.reduce(blocks, socket, fn block, acc ->

@@ -19,12 +19,16 @@ defmodule KnowlibWeb.Live.Page.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:text]} type="text" label="Text" />
-        <.input field={@form[:title]} type="text" label="Title" />
-        <.input field={@form[:order]} type="number" label="Order" />
-        <.input field={@form[:block_id]} type="text" label="BlockID" />
+        <.input field={@form[:order]} value={0} type="number" label="Очередь" />
+        <.input field={@form[:block_id]} type="select" label="Вебери блок знаний" options={
+          Knowlib.Knowledge.list_blocks(user_id: @current_user.id)
+          |> Enum.map(& &1.name)
+        } />
+
+        <.input field={@form[:title]} type="text" label="Заголовок" />
+        <.input field={@form[:text]} type="textarea" label="Текст" />
         <:actions>
-          <.button phx-disable-with="Saving...">Save Page</.button>
+          <.button phx-disable-with="Saving...">Сохранить</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -48,18 +52,22 @@ defmodule KnowlibWeb.Live.Page.FormComponent do
   end
 
   def handle_event("save", %{"page" => page_params}, socket) do
+    uid = socket.assigns.current_user.id
+    name = page_params["block_id"]
+
     page_params =
       page_params
-      |> Map.put("user_id", socket.assigns.current_user.id)
+      |> Map.update!("block_id", fn name ->
+        Knowledge.get_block_by_uid_and_name(uid, name).id
+      end)
+      |> Map.put("user_id", uid)
 
     save_page(socket, socket.assigns.action, page_params)
   end
 
-  defp save_page(socket, :edit, page_params) do
+  defp save_page(socket, :edit_page, page_params) do
     case Knowledge.update_page(socket.assigns.page, page_params) do
       {:ok, page} ->
-        notify_parent({:saved, page})
-
         {:noreply,
          socket
          |> put_flash(:info, "Page updated successfully")
@@ -70,11 +78,9 @@ defmodule KnowlibWeb.Live.Page.FormComponent do
     end
   end
 
-  defp save_page(socket, :new, page_params) do
+  defp save_page(socket, :new_page, page_params) do
     case Knowledge.create_page(page_params) do
       {:ok, page} ->
-        notify_parent({:saved, page})
-
         {:noreply,
          socket
          |> put_flash(:info, "Page created successfully")
@@ -84,6 +90,4 @@ defmodule KnowlibWeb.Live.Page.FormComponent do
         {:noreply, assign(socket, form: to_form(changeset))}
     end
   end
-
-  defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 end

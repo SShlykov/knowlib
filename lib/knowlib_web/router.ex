@@ -31,6 +31,9 @@ defmodule KnowlibWeb.Router do
 
       live "/blocks/new", Home, :new
       live "/blocks/:id/edit", Home, :edit
+
+      live "/pages/new", Home, :new_page
+      live "/pages/:id/edit", Home, :edit_page
     end
 
     scope "/blocks" do

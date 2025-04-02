@@ -26,6 +26,10 @@ defmodule Knowlib.Knowledge do
     |> Repo.preload([:pages])
   end
 
+  def get_block_by_uid_and_name(user_id, name) do
+    Repo.one(from b in Block, where: b.user_id == ^user_id and b.name == ^name)
+  end
+
   @doc """
   Gets a single block.
 
