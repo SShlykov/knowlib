@@ -35,6 +35,7 @@ defmodule Rag.OpenAIClient do
     }
 
     {:ok, env} = Tesla.post(client, "/chat/completions", data, opts: [adapter: [response: :stream]])
+    |> IO.inspect(label: "stream")
 
     env.body
     |> Stream.each(& on_chunk.(&1))

@@ -1,5 +1,4 @@
-<div class="h-full flex justify-center">
-
+<div class="h-full flex justify-center flex-col">
   <.sidebar
     page_title={@page_title}
     block={@block}
@@ -7,6 +6,16 @@
     live_action={@live_action}
     current_user={@current_user}
     />
+
+  <div class="border rounded-md h-[250px] m-4 bg-white flex justify-between flex-row">
+    <div class="w-full border-r border-slate-200 flex items-center justify-center">Всего: {@total_blocks}</div>
+    <div class="w-full border-r border-slate-200 flex items-center justify-center flex-col">
+      Топ 5 блоков по знаниям:
+      <div :for={%{name: name, count: count} <- @block_knowledge_count}>{name}: {count}</div>
+    </div>
+    <div class="w-full border-r border-slate-200 flex items-center justify-center"></div>
+    <div class="w-full flex items-center justify-center"></div>
+  </div>
 
   <div class="h-full flex flex-col justify-between items-center w-full gap-8">
     <.list_messages messages={@streams.messages} />

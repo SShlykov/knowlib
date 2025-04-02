@@ -1,4 +1,5 @@
 defmodule KnowlibWeb.Live.Home do
+  require Logger
   use KnowlibWeb, :live_view
 
   import KnowlibWeb.Components.Room
@@ -8,28 +9,40 @@ defmodule KnowlibWeb.Live.Home do
   def mount(_params, session, socket) do
     current_user = Knowlib.Accounts.get_user_by_session_token(session["user_token"])
 
+    init_message = %{
+      icon:  "https://cdn-icons-png.flaticon.com/512/2021/2021646.png",
+      time:  now(),
+      name:  "system",
+      align: "right",
+      text:  "Введите свое сообщение",
+      id:    rand_string()
+    }
+
     socket =
       socket
+      |> assign(:uploading_status, false)
       |> assign(:current_user, current_user)
-      |> stream(:messages, [
-        %{icon:  "https://cdn-icons-png.flaticon.com/512/2021/2021646.png",
-          time:  now(),
-          name:  "system",
-          align: "right",
-          text:  "Введите свое сообщение",
-          id:    rand_string()
-        }
-      ])
+      |> assign(:last_message, init_message)
+      |> stream(:messages, [init_message])
 
     {:ok, socket}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
+    blocks = Knowledge.list_blocks(user_id: socket.assigns.current_user.id)
+    block_knowledge_count =
+      blocks
+      |> Enum.map(fn %{name: name, pages: pages} -> %{name: name, count: length(pages)} end)
+      |> Enum.sort(& &1.count > &2.count)
+      |> Enum.take(5)
+
     socket =
       socket
       |> apply_action(socket.assigns.live_action, params)
-      |> stream(:blocks, Knowledge.list_blocks(user_id: socket.assigns.current_user.id))
+      |> assign(:total_blocks, length(blocks))
+      |> assign(:block_knowledge_count, block_knowledge_count)
+      |> stream(:blocks, blocks)
 
     {:noreply, socket}
   end
@@ -50,12 +63,28 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   @impl true
-  def handle_event("send_message", %{"message" => client_message}, socket) do
+  def handle_event("send_message", %{"message" => client_message}, socket) when client_message != "" do
+    self = self()
+
+    spawn(fn ->
+      Rag.Agent.run_stream("ответь в 100 словах: " <> client_message, fn
+        %{"choices" => [%{"delta" => %{"finish_reason" => "stop"}}]} ->
+          send(self, :done_upload)
+          :ok
+        %{"choices" => [%{"delta" => %{"content" => content}}]} when content != "" ->
+          send(self, {:send_ai_responce_message, content})
+        _any ->
+          :ok
+      end)
+    end)
+
+    message = user_message(client_message, socket.assigns.current_user.email)
+
     socket =
       socket
-      |> stream_insert(:messages, message(client_message, socket.assigns.current_user.email))
-
-    send(self(), {:send_system_message, "Думаю..."})
+      |> assign(:uploading_status, true)
+      |> assign(:last_message, message)
+      |> stream_insert(:messages, message)
 
     {:noreply, socket}
   end
@@ -66,21 +95,44 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   @impl true
-  def handle_info({:send_system_message, system_message}, socket) do
-    :timer.sleep(2000)
+  def handle_info({:send_ai_responce_message, system_message}, %{assigns: %{last_message: %{name: "system"} = msg}} = socket) do
+    new_message = Map.update!(msg, :text, fn text -> text <> system_message end)
 
     socket =
       socket
-      |> stream_insert(:messages, message(system_message))
+      |> stream_delete(:messages, msg)
+      |> assign(:last_message, new_message)
+      |> stream_insert(:messages, new_message)
 
     {:noreply, socket}
   end
 
-  def message(message, name) do
+  @impl true
+  def handle_info({:send_ai_responce_message, system_message}, %{assigns: %{last_message: msg}} = socket) do
+    message = system_message(system_message)
+
+    socket =
+      socket
+      |> assign(:last_message, message)
+      |> stream_insert(:messages, message)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:done_upload, socket) do
+    socket =
+      socket
+      |> assign(:uploading_status, false)
+
+    {:noreply, socket}
+  end
+
+  def user_message(message, name) do
     message("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUW0u5Eiiy3oM6wcpeEE6sXCzlh8G-tX1_Iw&s", "left", message, name)
   end
 
-  def message(message) do
+  def system_message(message) do
     message("https://cdn-icons-png.flaticon.com/512/2021/2021646.png", "right", message, "system")
   end
 

@@ -81,7 +81,6 @@ defmodule Rag.QdrantClient do
     end)
   end
 
-
   def search(query, limit \\ 5) do
     with {:ok, vector} <- OpenAIClient.embed(query),
          {:ok, %Tesla.Env{body: %{"result" => results}}} <- search_vector(vector, limit) do

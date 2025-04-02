@@ -1,4 +1,4 @@
-defmodule KnowlibWeb.PageLive.FormComponent do
+defmodule KnowlibWeb.Live.Page.FormComponent do
   use KnowlibWeb, :live_component
 
   alias Knowlib.Knowledge

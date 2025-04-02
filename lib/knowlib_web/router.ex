@@ -35,20 +35,14 @@ defmodule KnowlibWeb.Router do
 
     scope "/blocks" do
       live "/", BlockLive.Index, :index
-      live "/new", BlockLive.Index, :new
-      live "/:id/edit", BlockLive.Index, :edit
 
       live "/:id", BlockLive.Show, :show
-      live "/:id/show/edit", BlockLive.Show, :edit
     end
 
     scope "/pages" do
       live "/", PageLive.Index, :index
-      live "/new", PageLive.Index, :new
-      live "/:id/edit", PageLive.Index, :edit
 
       live "/:id", PageLive.Show, :show
-      live "/:id/show/edit", PageLive.Show, :edit
     end
   end
 
