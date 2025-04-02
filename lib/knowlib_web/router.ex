@@ -29,6 +29,8 @@ defmodule KnowlibWeb.Router do
     scope "/home", Live do
       live "/", Home, :index
 
+      live "/chat/:id", Home, :show_chat
+
       live "/blocks/new", Home, :new
       live "/blocks/:id/edit", Home, :edit
 

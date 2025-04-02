@@ -23,6 +23,7 @@ defmodule KnowlibWeb.Live.Home do
       |> assign(:uploading_status, false)
       |> assign(:current_user, current_user)
       |> assign(:last_message, init_message)
+      |> assign(:last_message, init_message)
       |> stream(:messages, [init_message])
 
     {:ok, socket}
@@ -43,6 +44,15 @@ defmodule KnowlibWeb.Live.Home do
       |> assign(:total_blocks, length(blocks))
       |> assign(:block_knowledge_count, block_knowledge_count)
       |> stream(:blocks, blocks)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("save_page_modal", %{"text" => text}, socket) do
+    socket =
+      socket
+      |> assign(:live_action, :new_page)
+      |> assign(:page, %Page{text: text})
 
     {:noreply, socket}
   end
@@ -154,6 +164,16 @@ defmodule KnowlibWeb.Live.Home do
   end
 
   def now, do: DateTime.utc_now() |> Calendar.strftime("%H:%M")
+
+  defp apply_action(socket, :show_chat, %{"id" => page_id}) do
+    page = Knowledge.get_page!(page_id)
+
+    socket
+    |> assign(:page_title, page.title)
+    |> assign(:block, nil)
+    |> assign(:page, page)
+    |> stream_insert(:messages, system_message(page.text))
+  end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket

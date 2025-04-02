@@ -6,7 +6,7 @@ defmodule KnowlibWeb.Components.Room do
     ~H"""
     <div class="flex flex-col items-center w-full max-h-[calc(100vh-400px)] gap-6 pt-10 overflow-y-auto" id="messages" phx-update="stream">
       <div :for={{dom_id, message} <- @messages} id={dom_id} class="w-full max-w-[700px]">
-        <.chat_buble icon={message.icon} time={message.time} name={message.name} align={message.align} text={message.text} id={message.id}/>
+        <.chat_bubble icon={message.icon} time={message.time} name={message.name} align={message.align} text={message.text} id={message.id}/>
       </div>
     </div>
     """
